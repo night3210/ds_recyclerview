@@ -1,7 +1,5 @@
 package com.pproduct.datasource.recyclerview;
 
-
-import android.os.Handler;
 import android.app.Activity;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
@@ -15,7 +13,6 @@ import java.lang.ref.WeakReference;
 
 import com.pproduct.datasource.core.DataSource;
 import com.pproduct.datasource.core.ListDataSource;
-import com.pproduct.datasource.core.LogUtils;
 import com.pproduct.datasource.core.listeners.DataObject;
 import com.pproduct.datasource.core.listeners.DataSourceStateListener;
 import com.pproduct.datasource.core.listeners.Fetch;
@@ -65,7 +62,7 @@ public abstract class BaseFragment extends Fragment {
         mSwipeRefreshLayout.setOnRefreshListener(new RefreshLayout.OnRefreshListener() {
             @Override
             public void onRefresh() {
-                mDatasource.startContentReloading();
+                mDatasource.startContentRefreshing();
             }
         });
         mLayoutManager = new LinearLayoutManager(getContext());

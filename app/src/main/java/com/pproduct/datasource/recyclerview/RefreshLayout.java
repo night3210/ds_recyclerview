@@ -7,8 +7,6 @@ import android.util.AttributeSet;
 import android.view.MotionEvent;
 import android.view.ViewConfiguration;
 
-
-
 public class RefreshLayout extends SwipeRefreshLayout {
 
     private final int mTouchSlop;

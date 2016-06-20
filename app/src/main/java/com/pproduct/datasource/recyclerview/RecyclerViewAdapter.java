@@ -4,11 +4,10 @@ import android.support.v7.widget.RecyclerView;
 import android.view.ViewGroup;
 
 
-import java.lang.ref.WeakReference;
-
-import com.pproduct.datasource.core.DataStructure;
 import com.pproduct.datasource.core.ListDataSource;
-import com.pproduct.datasource.recyclerview.BaseRecyclerViewHolder;
+import com.pproduct.datasource.core.data_structure.DataStructure;
+
+import java.lang.ref.WeakReference;
 
 /**
  * Created by Developer on 2/10/2016.
@@ -61,7 +60,7 @@ public class RecyclerViewAdapter extends RecyclerView.Adapter<BaseRecyclerViewHo
         if(dataStructure==null)
             throw new IllegalStateException("DataStructure == null");
         int section = 0;
-        for(int i=0;i<dataStructure.sectionsCount();i++) {
+        for(int i=0;i<dataStructure.getSectionsCount();i++) {
             int sectionCount = dataStructure.itemsCountForSection(i);
             if (row < sectionCount) {
                 break;
@@ -76,7 +75,7 @@ public class RecyclerViewAdapter extends RecyclerView.Adapter<BaseRecyclerViewHo
         DataStructure dataStructure = mData.get();
         if(dataStructure == null)
             throw new IllegalStateException("DataStructure == null");
-        for(int i=0; i<dataStructure.sectionsCount(); i++) {
+        for(int i=0; i<dataStructure.getSectionsCount(); i++) {
             if(path.getSection() == i)
                 break;
             position += dataStructure.itemsCountForSection(i);

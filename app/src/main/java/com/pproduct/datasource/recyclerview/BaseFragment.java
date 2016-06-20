@@ -22,18 +22,20 @@ import com.pproduct.datasource.core.listeners.Fetch;
 /**
  * Created by Developer on 2/11/2016.
  */
-public abstract class BaseFragment extends Fragment {
+public abstract class BaseFragment<T extends DataObject> extends Fragment {
     protected View mRootView;
     protected WeakReference<Activity> mBaseLayoutActivity;
     protected RecyclerView mRecyclerView;
     protected RefreshLayout mSwipeRefreshLayout;
     protected LinearLayoutManager mLayoutManager;
-    protected ListDataSource<DataObject> mDatasource;
+    protected ListDataSource<T> mDatasource;
     protected RecyclerViewAdapter mAdapter;
 
     protected View footerLayout;
     private ProgressView progressBar;
     private TextView textMore;
+
+    protected Fetch mFetch;
 
     @Override
     public void onCreate(@Nullable Bundle savedInstanceState) {
@@ -41,11 +43,25 @@ public abstract class BaseFragment extends Fragment {
         mBaseLayoutActivity = new WeakReference<Activity>((Activity) getContext());
     }
 
+    @Override
+    public void onViewCreated(View view, @Nullable Bundle savedInstanceState) {
+        super.onViewCreated(view, savedInstanceState);
+        initRecyclerView();
+        initDataSource();
+    }
+
     public boolean isAlive() {
         return !((getActivity() == null) || !isVisible() || isDetached());
     }
 
-    public void initDataSource(Fetch fetch) {
+    protected ListDataSource<T> createDataSource() {
+        if (mFetch == null) {
+            throw new IllegalStateException("You need to provide fetch");
+        }
+        return new ListDataSource<>(mFetch);
+    }
+
+    protected void initRecyclerView() {
         mRootView = getLayoutInflater(getArguments()).inflate(R.layout.baselayout, null);
         mRecyclerView = (RecyclerView) mRootView.findViewById(getRecyclerViewID());
         mRecyclerView.setHasFixedSize(true);
@@ -69,7 +85,18 @@ public abstract class BaseFragment extends Fragment {
         mRecyclerView.setLayoutManager(mLayoutManager);
         mAdapter = new RecyclerViewAdapter(getAdapterDelegate());
         mRecyclerView.setAdapter(mAdapter);
-        mDatasource = new ListDataSource<>(fetch);
+        //footerLayout = getLayoutInflater(getArguments()).inflate(R.layout.footer_layout, null);
+        textMore = (TextView) mRootView.findViewById(R.id.text_more);
+        progressBar = (ProgressView) mRootView.findViewById(R.id.load_progress_bar);
+        textMore.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                //simulateLoadingData();
+            }
+        });
+    }
+    public void initDataSource() {
+        mDatasource = createDataSource();
         mDatasource.setStateListener(new DataSourceStateListener() {
             @Override
             public void dataSourceChangedState(DataSource dataSource, DataSource.State newState) {
@@ -84,15 +111,6 @@ public abstract class BaseFragment extends Fragment {
             }
         });
         mDatasource.startContentLoading();
-        //footerLayout = getLayoutInflater(getArguments()).inflate(R.layout.footer_layout, null);
-        textMore = (TextView) mRootView.findViewById(R.id.text_more);
-        progressBar = (ProgressView) mRootView.findViewById(R.id.load_progress_bar);
-        textMore.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                //simulateLoadingData();
-            }
-        });
     }
     protected abstract RecyclerViewAdapter.AdapterDelegate getAdapterDelegate();
 
@@ -102,5 +120,13 @@ public abstract class BaseFragment extends Fragment {
     }
     protected int getSwipeLayoutID() {
         return R.id.ds_refresh_layout;
+    }
+
+    public Fetch getFetch() {
+        return mFetch;
+    }
+
+    public void setFetch(Fetch mFetch) {
+        this.mFetch = mFetch;
     }
 }

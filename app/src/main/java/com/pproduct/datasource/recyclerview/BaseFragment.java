@@ -6,7 +6,9 @@ import android.support.annotation.Nullable;
 import android.support.v4.app.Fragment;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
+import android.view.LayoutInflater;
 import android.view.View;
+import android.view.ViewGroup;
 import android.widget.TextView;
 
 import java.lang.ref.WeakReference;
@@ -43,6 +45,13 @@ public abstract class BaseFragment<T extends DataObject> extends Fragment {
         mBaseLayoutActivity = new WeakReference<Activity>((Activity) getContext());
     }
 
+    @Nullable
+    @Override
+    public View onCreateView(LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
+        mRootView = inflater.inflate(getLayoutId(), container);
+        return mRootView;
+    }
+
     @Override
     public void onViewCreated(View view, @Nullable Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
@@ -62,7 +71,6 @@ public abstract class BaseFragment<T extends DataObject> extends Fragment {
     }
 
     protected void initRecyclerView() {
-        mRootView = getLayoutInflater(getArguments()).inflate(R.layout.baselayout, null);
         mRecyclerView = (RecyclerView) mRootView.findViewById(getRecyclerViewID());
         mRecyclerView.setHasFixedSize(true);
         mSwipeRefreshLayout = (RefreshLayout) mRootView.findViewById(getSwipeLayoutID());
@@ -121,6 +129,7 @@ public abstract class BaseFragment<T extends DataObject> extends Fragment {
     protected int getSwipeLayoutID() {
         return R.id.ds_refresh_layout;
     }
+    protected abstract int getLayoutId();
 
     public Fetch getFetch() {
         return mFetch;

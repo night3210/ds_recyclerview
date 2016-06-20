@@ -43,4 +43,9 @@ public class SimpleRecyclerFragment<T extends DataObject> extends BaseFragment<T
             }
         };
     }
+
+    @Override
+    protected int getLayoutId() {
+        return R.layout.baselayout;
+    }
 }

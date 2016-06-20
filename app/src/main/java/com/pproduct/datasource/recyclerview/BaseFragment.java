@@ -48,7 +48,7 @@ public abstract class BaseFragment<T extends DataObject> extends Fragment {
     @Nullable
     @Override
     public View onCreateView(LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
-        mRootView = inflater.inflate(getLayoutId(), container);
+        mRootView = inflater.inflate(getLayoutId(), container, false);
         return mRootView;
     }
 

@@ -3,9 +3,8 @@ package com.pproduct.datasource.recyclerview;
 import android.support.v7.widget.RecyclerView;
 import android.view.ViewGroup;
 
-
-import com.pproduct.datasource.core.ListDataSource;
-import com.pproduct.datasource.core.data_structure.DataStructure;
+import com.night3210.datasource.core.ListDataSource;
+import com.night3210.datasource.core.data_structure.DataStructure;
 
 import java.lang.ref.WeakReference;
 

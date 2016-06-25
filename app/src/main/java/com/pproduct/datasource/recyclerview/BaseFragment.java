@@ -11,15 +11,13 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.TextView;
 
+import com.night3210.datasource.core.DataSource;
+import com.night3210.datasource.core.ListDataSource;
+import com.night3210.datasource.core.listeners.DataObject;
+import com.night3210.datasource.core.listeners.DataSourceStateListener;
+import com.night3210.datasource.core.listeners.Fetch;
+
 import java.lang.ref.WeakReference;
-
-import com.pproduct.datasource.core.DataSource;
-import com.pproduct.datasource.core.ListDataSource;
-import com.pproduct.datasource.core.listeners.DataObject;
-import com.pproduct.datasource.core.listeners.DataSourceStateListener;
-import com.pproduct.datasource.core.listeners.Fetch;
-
-
 
 /**
  * Created by Developer on 2/11/2016.

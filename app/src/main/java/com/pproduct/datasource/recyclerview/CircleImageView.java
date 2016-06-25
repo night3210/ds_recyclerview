@@ -12,7 +12,7 @@ import android.support.v4.view.ViewCompat;
 import android.view.animation.Animation;
 import android.widget.ImageView;
 
-import com.pproduct.datasource.core.LogUtils;
+import com.night3210.datasource.core.LogUtils;
 
 /**
  * Created by Developer on 2/15/2016.

@@ -5,9 +5,9 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.TextView;
 
-import com.pproduct.datasource.core.LogUtils;
-import com.pproduct.datasource.core.data_structure.DataStructure;
-import com.pproduct.datasource.core.listeners.DataObject;
+import com.night3210.datasource.core.LogUtils;
+import com.night3210.datasource.core.data_structure.DataStructure;
+import com.night3210.datasource.core.listeners.DataObject;
 
 /**
  * Created by haritonbatkov on 6/20/16.

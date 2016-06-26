@@ -1,6 +1,7 @@
 package com.pproduct.datasource.recyclerview;
 
 import android.util.Log;
+import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.TextView;
@@ -23,7 +24,7 @@ public class SimpleRecyclerFragment<T extends DataObject> extends BaseFragment<T
 
             @Override
             public BaseRecyclerViewHolder createViewForViewType(ViewGroup parent, int type) {
-                View row = View.inflate(getContext(), R.layout.base_recycler_row, parent);
+                View row = LayoutInflater.from(parent.getContext()).inflate(R.layout.base_recycler_row, parent, false);
                 BaseRecyclerViewHolder holder = new BaseRecyclerViewHolder(row);
                 return holder;
             }

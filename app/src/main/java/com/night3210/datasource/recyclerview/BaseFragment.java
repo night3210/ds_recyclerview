@@ -1,4 +1,4 @@
-package com.pproduct.datasource.recyclerview;
+package com.night3210.datasource.recyclerview;
 
 import android.app.Activity;
 import android.os.Bundle;

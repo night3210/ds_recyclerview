@@ -1,5 +1,5 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
-    package="com.pproduct.datasource.recyclerview">
+    package="com.night3210.datasource.recyclerview">
 
     <application
         android:allowBackup="true"

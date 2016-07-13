@@ -1,4 +1,4 @@
-package com.pproduct.datasource.recyclerview;
+package com.night3210.datasource.recyclerview;
 
 import android.support.v7.widget.RecyclerView;
 import android.view.View;

@@ -1,6 +1,7 @@
 package com.night3210.datasource.recyclerview;
 
 import android.app.Activity;
+import android.os.Build;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
 import android.support.v4.app.Fragment;
@@ -13,6 +14,7 @@ import android.widget.TextView;
 
 import com.night3210.datasource.core.DataSource;
 import com.night3210.datasource.core.ListDataSource;
+import com.night3210.datasource.core.LogUtils;
 import com.night3210.datasource.core.listeners.DataObject;
 import com.night3210.datasource.core.listeners.DataSourceStateListener;
 import com.night3210.datasource.core.listeners.Fetch;
@@ -70,6 +72,8 @@ public abstract class BaseFragment<T extends DataObject> extends Fragment {
 
     protected void initRecyclerView() {
         mRecyclerView = (RecyclerView) mRootView.findViewById(getRecyclerViewID());
+        if(mRecyclerView==null)
+            return;
         mRecyclerView.setHasFixedSize(true);
         mSwipeRefreshLayout = (RefreshLayout) mRootView.findViewById(getSwipeLayoutID());
         mSwipeRefreshLayout.setChildView(mRecyclerView);
@@ -102,6 +106,10 @@ public abstract class BaseFragment<T extends DataObject> extends Fragment {
         });
     }
     public void initDataSource() {
+        if(mFetch==null) {
+            LogUtils.logi("No datasourse fetch.");
+            return;
+        }
         mDatasource = createDataSource();
         mDatasource.setStateListener(new DataSourceStateListener() {
             @Override

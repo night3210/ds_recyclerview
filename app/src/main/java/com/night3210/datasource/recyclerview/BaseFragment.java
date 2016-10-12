@@ -5,6 +5,7 @@ import android.os.Build;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
 import android.support.v4.app.Fragment;
+import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
@@ -26,7 +27,7 @@ import java.lang.ref.WeakReference;
  */
 public abstract class BaseFragment<T extends DataObject> extends Fragment {
     protected View mRootView;
-    protected WeakReference<Activity> mBaseLayoutActivity;
+    protected WeakReference<AppCompatActivity> mBaseLayoutActivity;
     protected RecyclerView mRecyclerView;
     protected RefreshLayout mSwipeRefreshLayout;
     protected LinearLayoutManager mLayoutManager;
@@ -42,7 +43,7 @@ public abstract class BaseFragment<T extends DataObject> extends Fragment {
     @Override
     public void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        mBaseLayoutActivity = new WeakReference<Activity>((Activity) getContext());
+        mBaseLayoutActivity = new WeakReference<>((AppCompatActivity) getContext());
     }
 
     @Nullable
@@ -60,7 +61,7 @@ public abstract class BaseFragment<T extends DataObject> extends Fragment {
     }
 
     public boolean isAlive() {
-        return !((getActivity() == null) || !isVisible() || isDetached());
+        return !((getActivity() == null) || isDetached());
     }
 
     protected ListDataSource<T> createDataSource() {
@@ -72,8 +73,10 @@ public abstract class BaseFragment<T extends DataObject> extends Fragment {
 
     protected void initRecyclerView() {
         mRecyclerView = (RecyclerView) mRootView.findViewById(getRecyclerViewID());
-        if(mRecyclerView==null)
+        if(mRecyclerView==null) {
+            LogUtils.logi("No recyclerview, skip datasource creation");
             return;
+        }
         mRecyclerView.setHasFixedSize(true);
         mSwipeRefreshLayout = (RefreshLayout) mRootView.findViewById(getSwipeLayoutID());
         mSwipeRefreshLayout.setChildView(mRecyclerView);
@@ -116,11 +119,15 @@ public abstract class BaseFragment<T extends DataObject> extends Fragment {
             public void dataSourceChangedState(DataSource dataSource, DataSource.State newState) {
                 mAdapter.setDataSource(mDatasource);
                 mAdapter.notifyDataSetChanged();
-                if(newState== DataSource.State.CONTENT) {
+                if(newState == DataSource.State.CONTENT) {
                     progressBar.stop();
                     mSwipeRefreshLayout.setRefreshing(false);
                     mSwipeRefreshLayout.setLoading(false);
                     progressBar.setVisibility(View.GONE);
+                }else if(newState == DataSource.State.NO_CONTENT) {
+                    progressBar.stop();
+                    progressBar.setVisibility(View.GONE);
+
                 }
             }
         });
@@ -144,4 +151,5 @@ public abstract class BaseFragment<T extends DataObject> extends Fragment {
     public void setFetch(Fetch mFetch) {
         this.mFetch = mFetch;
     }
+
 }

@@ -9,13 +9,10 @@ import com.night3210.datasource.core.data_structure.DataStructure;
 import java.lang.ref.WeakReference;
 
 /**
- * Created by Developer on 2/10/2016.
+ * Created by Ivan on 2/10/2016.
  */
-
 public class RecyclerViewAdapter extends RecyclerView.Adapter<BaseRecyclerViewHolder> {
     WeakReference<DataStructure> mData;
-
-
     public interface AdapterDelegate {
         int getViewType(DataStructure.IndexPath ip);
         BaseRecyclerViewHolder createViewForViewType(ViewGroup parent, int type);
@@ -24,11 +21,9 @@ public class RecyclerViewAdapter extends RecyclerView.Adapter<BaseRecyclerViewHo
     }
     private AdapterDelegate mAdapterDelegate;
     public RecyclerViewAdapter(AdapterDelegate adapterDelegate) {
-//        if(str==null)
-//            throw new IllegalArgumentException("Empty datastructure");
+        setHasStableIds(true);
         if(adapterDelegate==null)
             throw new IllegalArgumentException("Empty adapterDelegate");
-        //mData=new WeakReference<>(str);
         mAdapterDelegate = adapterDelegate;
     }
     @Override
@@ -48,8 +43,7 @@ public class RecyclerViewAdapter extends RecyclerView.Adapter<BaseRecyclerViewHo
     }
     @Override
     public int getItemViewType(int position) {
-        if(mData==null ||
-                mData.get()==null)
+        if(mData==null || mData.get()==null)
             return 0;
         return getIndexPathForPosition(position).getSection();
     }
@@ -84,5 +78,17 @@ public class RecyclerViewAdapter extends RecyclerView.Adapter<BaseRecyclerViewHo
     public void setDataSource(ListDataSource dataSource) {
         mData=new WeakReference<DataStructure>(dataSource.getDataStructure());
     }
+    public Object getItem(int position) {
+        if(mData==null || mData.get()==null)
+            return null;
+        return mData.get().getItemForIndexPath(getIndexPathForPosition(position));
+    }
+    public void insertItem(Object item) {
+        //mData.get().add
+    }
 
+    @Override
+    public long getItemId(int position) {
+        return position;
+    }
 }

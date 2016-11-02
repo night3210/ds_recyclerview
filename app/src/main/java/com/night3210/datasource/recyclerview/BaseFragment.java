@@ -38,7 +38,6 @@ public abstract class BaseFragment<T extends DataObject> extends Fragment {
     private ProgressView progressBar;
     private TextView textMore;
 
-    protected Fetch mFetch;
 
     @Override
     public void onCreate(@Nullable Bundle savedInstanceState) {
@@ -65,12 +64,11 @@ public abstract class BaseFragment<T extends DataObject> extends Fragment {
     }
 
     protected ListDataSource<T> createDataSource() {
-        if (mFetch == null) {
-            throw new IllegalStateException("You need to provide fetch");
-        }
-        return new ListDataSource<>(mFetch);
+        return null;
     }
-
+    public void setRecyclerSizeFree(){
+        mRecyclerView.setHasFixedSize(false);
+    }
     protected void initRecyclerView() {
         mRecyclerView = (RecyclerView) mRootView.findViewById(getRecyclerViewID());
         if(mRecyclerView==null) {
@@ -101,24 +99,27 @@ public abstract class BaseFragment<T extends DataObject> extends Fragment {
         //footerLayout = getLayoutInflater(getArguments()).inflate(R.layout.footer_layout, null);
         textMore = (TextView) mRootView.findViewById(R.id.text_more);
         progressBar = (ProgressView) mRootView.findViewById(R.id.load_progress_bar);
-        textMore.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                //simulateLoadingData();
-            }
-        });
+        if(textMore!=null)
+            textMore.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View v) {
+                    //simulateLoadingData();
+                }
+            });
     }
     public void initDataSource() {
-        if(mFetch==null) {
-            LogUtils.logi("No datasourse fetch.");
+        mDatasource = createDataSource();
+        if(mDatasource==null) {
+            LogUtils.logi("No datasource or fetch, skip datasource creation. ds/fetch = "+mDatasource);
             return;
         }
-        mDatasource = createDataSource();
         mDatasource.setStateListener(new DataSourceStateListener() {
             @Override
             public void dataSourceChangedState(DataSource dataSource, DataSource.State newState) {
-                mAdapter.setDataSource(mDatasource);
-                mAdapter.notifyDataSetChanged();
+                if(newState!= DataSource.State.REFRESH_CONTENT) {
+                    mAdapter.setDataSource(mDatasource);
+                    mAdapter.notifyDataSetChanged();
+                }
                 if(newState == DataSource.State.CONTENT) {
                     progressBar.stop();
                     mSwipeRefreshLayout.setRefreshing(false);
@@ -127,7 +128,6 @@ public abstract class BaseFragment<T extends DataObject> extends Fragment {
                 }else if(newState == DataSource.State.NO_CONTENT) {
                     progressBar.stop();
                     progressBar.setVisibility(View.GONE);
-
                 }
             }
         });
@@ -144,12 +144,6 @@ public abstract class BaseFragment<T extends DataObject> extends Fragment {
     }
     protected abstract int getLayoutId();
 
-    public Fetch getFetch() {
-        return mFetch;
-    }
-
     public void setFetch(Fetch mFetch) {
-        this.mFetch = mFetch;
     }
-
 }

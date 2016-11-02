@@ -123,7 +123,7 @@ class ProgressDrawable extends Drawable implements Animatable {
     }
 
 
-    public void updateSizes(@ProgressDrawableSize int size) {
+    public void updateSizes( int size) {
         if (size == LARGE) {
             setSizeParameters(CIRCLE_DIAMETER_LARGE, CIRCLE_DIAMETER_LARGE, CENTER_RADIUS_LARGE,
                     STROKE_WIDTH_LARGE, ARROW_WIDTH_LARGE, ARROW_HEIGHT_LARGE);

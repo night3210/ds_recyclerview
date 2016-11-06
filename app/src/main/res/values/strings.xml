@@ -1,3 +1,4 @@
 <resources>
     <string name="app_name">DataSource RecyclerView</string>
+    <string name="load_more">Load more...</string>
 </resources>

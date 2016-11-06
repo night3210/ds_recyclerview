@@ -1,6 +1,5 @@
 package com.night3210.datasource.recyclerview;
 
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -13,10 +12,10 @@ import com.night3210.datasource.core.listeners.DataObject;
 /**
  * Created by haritonbatkov on 6/20/16.
  */
-public class SimpleRecyclerFragment<T extends DataObject> extends BaseFragment<T> {
+public class SimpleRecyclerFragment<T extends DataObject> extends BaseFragment<T, BaseRecyclerViewHolder> {
     @Override
-    protected RecyclerViewAdapter.AdapterDelegate getAdapterDelegate() {
-        return new RecyclerViewAdapter.AdapterDelegate() {
+    protected RecyclerViewAdapter.AdapterDelegate<BaseRecyclerViewHolder> getAdapterDelegate() {
+        return new RecyclerViewAdapter.AdapterDelegate<BaseRecyclerViewHolder>() {
             @Override
             public int getViewType(DataStructure.IndexPath ip) {
                 return 0;

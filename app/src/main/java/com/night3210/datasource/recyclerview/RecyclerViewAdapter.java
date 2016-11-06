@@ -1,24 +1,28 @@
 package com.night3210.datasource.recyclerview;
 
 import android.support.v7.widget.RecyclerView;
+import android.view.View;
 import android.view.ViewGroup;
 
 import com.night3210.datasource.core.ListDataSource;
 import com.night3210.datasource.core.data_structure.DataStructure;
+import com.night3210.datasource.core.listeners.DataObject;
 
 import java.lang.ref.WeakReference;
 
 /**
  * Created by Ivan on 2/10/2016.
  */
-public class RecyclerViewAdapter extends RecyclerView.Adapter<BaseRecyclerViewHolder> {
-    WeakReference<DataStructure> mData;
-    public interface AdapterDelegate {
+public class RecyclerViewAdapter<T extends BaseRecyclerViewHolder, H extends DataObject> extends RecyclerView.Adapter<T> {
+    protected WeakReference<DataStructure<H>> mData;
+
+    public interface AdapterDelegate<T extends BaseRecyclerViewHolder> {
         int getViewType(DataStructure.IndexPath ip);
-        BaseRecyclerViewHolder createViewForViewType(ViewGroup parent, int type);
+        T createViewForViewType(ViewGroup parent, int type);
         void customizeViewFor(DataStructure.IndexPath ip, BaseRecyclerViewHolder holder);
         void cellSelected(DataStructure.IndexPath ip);
     }
+
     private AdapterDelegate mAdapterDelegate;
     public RecyclerViewAdapter(AdapterDelegate adapterDelegate) {
         setHasStableIds(true);
@@ -27,12 +31,21 @@ public class RecyclerViewAdapter extends RecyclerView.Adapter<BaseRecyclerViewHo
         mAdapterDelegate = adapterDelegate;
     }
     @Override
-    public BaseRecyclerViewHolder onCreateViewHolder(ViewGroup parent, int viewType) {
-        return mAdapterDelegate.createViewForViewType(parent, viewType);
+    public T onCreateViewHolder(ViewGroup parent, int viewType) {
+        return (T) mAdapterDelegate.createViewForViewType(parent, viewType);
     }
     @Override
-    public void onBindViewHolder(BaseRecyclerViewHolder holder, int position) {
-        mAdapterDelegate.customizeViewFor(getIndexPathForPosition(position), holder);
+    public void onBindViewHolder(T holder, int position) {
+        final DataStructure.IndexPath indexPath = getIndexPathForPosition(position);
+        mAdapterDelegate.customizeViewFor(indexPath, holder);
+        if (holder.itemView != null) {
+            holder.itemView.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View view) {
+                    mAdapterDelegate.cellSelected(indexPath);
+                }
+            });
+        }
     }
     @Override
     public int getItemCount() {
@@ -49,7 +62,7 @@ public class RecyclerViewAdapter extends RecyclerView.Adapter<BaseRecyclerViewHo
     }
     public DataStructure.IndexPath getIndexPathForPosition(int position) {
         int row = position;
-        DataStructure dataStructure = mData.get();
+        DataStructure<H> dataStructure = mData.get();
         if(dataStructure==null)
             throw new IllegalStateException("DataStructure == null");
         int section = 0;
@@ -65,7 +78,7 @@ public class RecyclerViewAdapter extends RecyclerView.Adapter<BaseRecyclerViewHo
     }
     public int getPositionForIndexPath(DataStructure.IndexPath path) {
         int position = path.getRow();
-        DataStructure dataStructure = mData.get();
+        DataStructure<H> dataStructure = mData.get();
         if(dataStructure == null)
             throw new IllegalStateException("DataStructure == null");
         for(int i=0; i<dataStructure.getSectionsCount(); i++) {
@@ -76,14 +89,14 @@ public class RecyclerViewAdapter extends RecyclerView.Adapter<BaseRecyclerViewHo
         return position;
     }
     public void setDataSource(ListDataSource dataSource) {
-        mData=new WeakReference<DataStructure>(dataSource.getDataStructure());
+        mData=new WeakReference<DataStructure<H>>(dataSource.getDataStructure());
     }
-    public Object getItem(int position) {
+    public H getItem(int position) {
         if(mData==null || mData.get()==null)
             return null;
         return mData.get().getItemForIndexPath(getIndexPathForPosition(position));
     }
-    public void insertItem(Object item) {
+    public void insertItem(H item) {
         //mData.get().add
     }
 

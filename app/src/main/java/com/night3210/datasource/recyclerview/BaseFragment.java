@@ -1,7 +1,5 @@
 package com.night3210.datasource.recyclerview;
 
-import android.app.Activity;
-import android.os.Build;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
 import android.support.v4.app.Fragment;
@@ -25,7 +23,7 @@ import java.lang.ref.WeakReference;
 /**
  * Created by Developer on 2/11/2016.
  */
-public abstract class BaseFragment<T extends DataObject> extends Fragment {
+public abstract class BaseFragment<T extends DataObject, H extends BaseRecyclerViewHolder> extends Fragment {
     protected View mRootView;
     protected WeakReference<AppCompatActivity> mBaseLayoutActivity;
     protected RecyclerView mRecyclerView;
@@ -94,6 +92,7 @@ public abstract class BaseFragment<T extends DataObject> extends Fragment {
         });
         mLayoutManager = new LinearLayoutManager(getContext());
         mRecyclerView.setLayoutManager(mLayoutManager);
+
         mAdapter = new RecyclerViewAdapter(getAdapterDelegate());
         mRecyclerView.setAdapter(mAdapter);
         //footerLayout = getLayoutInflater(getArguments()).inflate(R.layout.footer_layout, null);
@@ -133,7 +132,7 @@ public abstract class BaseFragment<T extends DataObject> extends Fragment {
         });
         mDatasource.startContentLoading();
     }
-    protected abstract RecyclerViewAdapter.AdapterDelegate getAdapterDelegate();
+    protected abstract RecyclerViewAdapter.AdapterDelegate<H> getAdapterDelegate();
 
 
     protected int getRecyclerViewID() {

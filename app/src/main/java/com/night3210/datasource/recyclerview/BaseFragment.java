@@ -115,6 +115,8 @@ public abstract class BaseFragment<T extends DataObject, H extends BaseRecyclerV
         mDatasource.setStateListener(new DataSourceStateListener() {
             @Override
             public void dataSourceChangedState(DataSource dataSource, DataSource.State newState) {
+                if(mAdapter==null)
+                    throw new RuntimeException("no adapter inside datasource state listener");
                 if(newState!= DataSource.State.REFRESH_CONTENT) {
                     mAdapter.setDataSource(mDatasource);
                     mAdapter.notifyDataSetChanged();

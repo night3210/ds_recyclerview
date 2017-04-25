@@ -15,6 +15,10 @@ import java.lang.ref.WeakReference;
  */
 public class RecyclerViewAdapter<T extends BaseRecyclerViewHolder, H extends DataObject> extends RecyclerView.Adapter<T> {
     protected WeakReference<DataStructure<H>> mData;
+    AdapterDelegate footerHolder;
+    public static final int FOOTER_VIEW_TYPE = 1515;
+
+    private AdapterDelegate mAdapterDelegate;
 
     public interface AdapterDelegate<T extends BaseRecyclerViewHolder> {
         int getViewType(DataStructure.IndexPath ip);
@@ -23,19 +27,31 @@ public class RecyclerViewAdapter<T extends BaseRecyclerViewHolder, H extends Dat
         void cellSelected(DataStructure.IndexPath ip);
     }
 
-    private AdapterDelegate mAdapterDelegate;
     public RecyclerViewAdapter(AdapterDelegate adapterDelegate) {
         setHasStableIds(true);
         if(adapterDelegate==null)
             throw new IllegalArgumentException("Empty adapterDelegate");
         mAdapterDelegate = adapterDelegate;
     }
+
+    public void setFooterViewAdapterDelegate(AdapterDelegate delegate) {
+        footerHolder = delegate;
+    }
+
     @Override
     public T onCreateViewHolder(ViewGroup parent, int viewType) {
+        if(viewType==FOOTER_VIEW_TYPE) {
+            return (T) footerHolder.createViewForViewType(parent, viewType);
+        }
         return (T) mAdapterDelegate.createViewForViewType(parent, viewType);
     }
+
     @Override
     public void onBindViewHolder(T holder, int position) {
+        if(isFooterView(position)) {
+            footerHolder.customizeViewFor(null ,holder);
+            return;
+        }
         final DataStructure.IndexPath indexPath = getIndexPathForPosition(position);
         mAdapterDelegate.customizeViewFor(indexPath, holder);
         if (holder.itemView != null) {
@@ -47,19 +63,23 @@ public class RecyclerViewAdapter<T extends BaseRecyclerViewHolder, H extends Dat
             });
         }
     }
+
     @Override
     public int getItemCount() {
-        if(mData==null ||
-                mData.get()==null)
+        if(mData==null || mData.get()==null)
             return 0;
-        return mData.get().dataSize();
+        return mData.get().dataSize() + (footerHolder!=null?1:0);
     }
+
     @Override
     public int getItemViewType(int position) {
         if(mData==null || mData.get()==null)
             return 0;
+        if(isFooterView(position))
+            return FOOTER_VIEW_TYPE;
         return getIndexPathForPosition(position).getSection();
     }
+
     public DataStructure.IndexPath getIndexPathForPosition(int position) {
         int row = position;
         DataStructure<H> dataStructure = mData.get();
@@ -76,6 +96,7 @@ public class RecyclerViewAdapter<T extends BaseRecyclerViewHolder, H extends Dat
         }
         return new DataStructure.IndexPath(row, section);
     }
+
     public int getPositionForIndexPath(DataStructure.IndexPath path) {
         int position = path.getRow();
         DataStructure<H> dataStructure = mData.get();
@@ -88,14 +109,19 @@ public class RecyclerViewAdapter<T extends BaseRecyclerViewHolder, H extends Dat
         }
         return position;
     }
+
     public void setDataSource(ListDataSource dataSource) {
         mData=new WeakReference<DataStructure<H>>(dataSource.getDataStructure());
     }
+
     public H getItem(int position) {
+        if(isFooterView(position))
+            return null;
         if(mData==null || mData.get()==null)
             return null;
         return mData.get().getItemForIndexPath(getIndexPathForPosition(position));
     }
+
     public void insertItem(H item) {
         //mData.get().add
     }
@@ -103,5 +129,13 @@ public class RecyclerViewAdapter<T extends BaseRecyclerViewHolder, H extends Dat
     @Override
     public long getItemId(int position) {
         return position;
+    }
+
+    public boolean isFooterView(int position) {
+        if(footerHolder==null)
+            return false;
+        if(position < getItemCount()-1)
+            return false;
+        return true;
     }
 }

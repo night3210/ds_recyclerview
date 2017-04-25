@@ -32,7 +32,6 @@ public abstract class BaseFragment<T extends DataObject, H extends BaseRecyclerV
     protected ListDataSource<T> mDatasource;
     protected RecyclerViewAdapter mAdapter;
 
-    protected View footerLayout;
     private ProgressView progressBar;
     private TextView textMore;
 
@@ -53,6 +52,7 @@ public abstract class BaseFragment<T extends DataObject, H extends BaseRecyclerV
     @Override
     public void onViewCreated(View view, @Nullable Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
+        findViews();
         initRecyclerView();
         initDataSource();
     }
@@ -67,14 +67,25 @@ public abstract class BaseFragment<T extends DataObject, H extends BaseRecyclerV
     public void setRecyclerSizeFree(){
         mRecyclerView.setHasFixedSize(false);
     }
-    protected void initRecyclerView() {
+
+    private void findViews() {
+        findRecyclerView();
+        findSwipeRefreshLayout();
+        textMore = (TextView) mRootView.findViewById(R.id.text_more);
+        progressBar = (ProgressView) mRootView.findViewById(R.id.load_progress_bar);
+    }
+    protected void findRecyclerView() {
         mRecyclerView = (RecyclerView) mRootView.findViewById(getRecyclerViewID());
+    }
+    protected void findSwipeRefreshLayout() {
+        mSwipeRefreshLayout = (RefreshLayout) mRootView.findViewById(getSwipeLayoutID());
+    }
+    protected void initRecyclerView() {
         if(mRecyclerView==null) {
             LogUtils.logi("No recyclerview, skip datasource creation");
             return;
         }
         mRecyclerView.setHasFixedSize(true);
-        mSwipeRefreshLayout = (RefreshLayout) mRootView.findViewById(getSwipeLayoutID());
         mSwipeRefreshLayout.setChildView(mRecyclerView);
         mSwipeRefreshLayout.setOnLoadListener(new RefreshLayout.OnLoadListener() {
             @Override
@@ -96,8 +107,6 @@ public abstract class BaseFragment<T extends DataObject, H extends BaseRecyclerV
         mAdapter = new RecyclerViewAdapter(getAdapterDelegate());
         mRecyclerView.setAdapter(mAdapter);
         //footerLayout = getLayoutInflater(getArguments()).inflate(R.layout.footer_layout, null);
-        textMore = (TextView) mRootView.findViewById(R.id.text_more);
-        progressBar = (ProgressView) mRootView.findViewById(R.id.load_progress_bar);
         if(textMore!=null)
             textMore.setOnClickListener(new View.OnClickListener() {
                 @Override
@@ -117,6 +126,8 @@ public abstract class BaseFragment<T extends DataObject, H extends BaseRecyclerV
             public void dataSourceChangedState(DataSource dataSource, DataSource.State newState) {
                 if(mAdapter==null)
                     throw new RuntimeException("no adapter inside datasource state listener");
+                if(!isAlive())
+                    return;
                 if(newState!= DataSource.State.REFRESH_CONTENT) {
                     mAdapter.setDataSource(mDatasource);
                     mAdapter.notifyDataSetChanged();

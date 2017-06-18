@@ -30,7 +30,7 @@ public class SimpleRecyclerFragment<T extends DataObject> extends BaseFragment<T
 
             @Override
             public void customizeViewFor(DataStructure.IndexPath ip, BaseRecyclerViewHolder holder) {
-                T object = mDatasource.getDataStructure().getItemForIndexPath(ip);
+                T object = mDataSource.getDataStructure().getItemForIndexPath(ip);
                 TextView textView = (TextView) holder.itemView.findViewById(R.id.textView);
                 textView.setText(object.getObjectId());
 
@@ -38,7 +38,7 @@ public class SimpleRecyclerFragment<T extends DataObject> extends BaseFragment<T
 
             @Override
             public void cellSelected(DataStructure.IndexPath ip) {
-                T object = mDatasource.getDataStructure().getItemForIndexPath(ip);
+                T object = mDataSource.getDataStructure().getItemForIndexPath(ip);
                 LogUtils.logi("Cell selected: " + object.getObjectId());
             }
         };

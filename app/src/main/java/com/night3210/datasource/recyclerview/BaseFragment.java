@@ -14,6 +14,7 @@ import android.widget.TextView;
 import com.night3210.datasource.core.DataSource;
 import com.night3210.datasource.core.ListDataSource;
 import com.night3210.datasource.core.LogUtils;
+import com.night3210.datasource.core.listeners.ChangedCallback;
 import com.night3210.datasource.core.listeners.DataObject;
 import com.night3210.datasource.core.listeners.DataSourceStateListener;
 import com.night3210.datasource.core.listeners.Fetch;
@@ -29,7 +30,7 @@ public abstract class BaseFragment<T extends DataObject, H extends BaseRecyclerV
     protected RecyclerView mRecyclerView;
     protected RefreshLayout mSwipeRefreshLayout;
     protected LinearLayoutManager mLayoutManager;
-    protected ListDataSource<T> mDatasource;
+    protected ListDataSource<T> mDataSource;
     protected RecyclerViewAdapter mAdapter;
 
     private ProgressView progressBar;
@@ -62,7 +63,10 @@ public abstract class BaseFragment<T extends DataObject, H extends BaseRecyclerV
     }
 
     protected ListDataSource<T> createDataSource() {
-        return null;
+        if (mFetch == null) {
+            throw new IllegalStateException("You need to provide fetch before createDataSource called");
+        }
+        return new ListDataSource<>(mFetch);
     }
     public void setRecyclerSizeFree(){
         mRecyclerView.setHasFixedSize(false);
@@ -116,12 +120,12 @@ public abstract class BaseFragment<T extends DataObject, H extends BaseRecyclerV
             });
     }
     public void initDataSource() {
-        mDatasource = createDataSource();
-        if(mDatasource==null) {
-            LogUtils.logi("No datasource or fetch, skip datasource creation. ds/fetch = "+mDatasource);
+        mDataSource = createDataSource();
+        if(mDataSource ==null) {
+            LogUtils.logi("No datasource or fetch, skip datasource creation. ds/fetch = "+ mDataSource);
             return;
         }
-        mDatasource.setStateListener(new DataSourceStateListener() {
+        mDataSource.setStateListener(new DataSourceStateListener() {
             @Override
             public void dataSourceChangedState(DataSource dataSource, DataSource.State newState) {
                 if(mAdapter==null)
@@ -129,7 +133,7 @@ public abstract class BaseFragment<T extends DataObject, H extends BaseRecyclerV
                 if(!isAlive())
                     return;
                 if(newState!= DataSource.State.REFRESH_CONTENT) {
-                    mAdapter.setDataSource(mDatasource);
+                    mAdapter.setDataSource(mDataSource);
                     mAdapter.notifyDataSetChanged();
                 }
                 if(newState == DataSource.State.CONTENT) {
@@ -143,7 +147,15 @@ public abstract class BaseFragment<T extends DataObject, H extends BaseRecyclerV
                 }
             }
         });
-        mDatasource.startContentLoading();
+        mDataSource.setChangedListener(new ChangedCallback() {
+            @Override
+            public void changed() {
+                if(!isAlive())
+                    return;
+                mAdapter.notifyDataSetChanged();
+            }
+        });
+        mDataSource.startContentLoading();
     }
     protected abstract RecyclerViewAdapter.AdapterDelegate<H> getAdapterDelegate();
 
@@ -156,6 +168,8 @@ public abstract class BaseFragment<T extends DataObject, H extends BaseRecyclerV
     }
     protected abstract int getLayoutId();
 
-    public void setFetch(Fetch mFetch) {
+    public void setFetch(Fetch fetch) {
+        mFetch = fetch;
+    }
     }
 }

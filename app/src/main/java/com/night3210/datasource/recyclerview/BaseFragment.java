@@ -33,8 +33,10 @@ public abstract class BaseFragment<T extends DataObject, H extends BaseRecyclerV
     protected ListDataSource<T> mDataSource;
     protected RecyclerViewAdapter mAdapter;
 
-    private ProgressView progressBar;
-    private TextView textMore;
+    protected ProgressView progressBar;
+    protected TextView textMore;
+
+    protected Fetch mFetch;
 
 
     @Override
@@ -90,21 +92,7 @@ public abstract class BaseFragment<T extends DataObject, H extends BaseRecyclerV
             return;
         }
         mRecyclerView.setHasFixedSize(true);
-        mSwipeRefreshLayout.setChildView(mRecyclerView);
-        mSwipeRefreshLayout.setOnLoadListener(new RefreshLayout.OnLoadListener() {
-            @Override
-            public void onLoad() {
-                progressBar.setVisibility(View.VISIBLE);
-                progressBar.start();
-                mDatasource.startContentRefreshing();
-            }
-        });
-        mSwipeRefreshLayout.setOnRefreshListener(new RefreshLayout.OnRefreshListener() {
-            @Override
-            public void onRefresh() {
-                mDatasource.startContentRefreshing();
-            }
-        });
+        setupRefreshLayout();
         mLayoutManager = new LinearLayoutManager(getContext());
         mRecyclerView.setLayoutManager(mLayoutManager);
 
@@ -135,15 +123,14 @@ public abstract class BaseFragment<T extends DataObject, H extends BaseRecyclerV
                 if(newState!= DataSource.State.REFRESH_CONTENT) {
                     mAdapter.setDataSource(mDataSource);
                     mAdapter.notifyDataSetChanged();
+                    hideProgressBar();
                 }
                 if(newState == DataSource.State.CONTENT) {
-                    progressBar.stop();
                     mSwipeRefreshLayout.setRefreshing(false);
                     mSwipeRefreshLayout.setLoading(false);
-                    progressBar.setVisibility(View.GONE);
+                    hideProgressBar();
                 }else if(newState == DataSource.State.NO_CONTENT) {
-                    progressBar.stop();
-                    progressBar.setVisibility(View.GONE);
+                    hideProgressBar();
                 }
             }
         });
@@ -157,6 +144,17 @@ public abstract class BaseFragment<T extends DataObject, H extends BaseRecyclerV
         });
         mDataSource.startContentLoading();
     }
+
+    protected void hideProgressBar() {
+        progressBar.stop();
+        progressBar.setVisibility(View.GONE);
+    }
+
+    protected void showProgressBar() {
+        progressBar.start();
+        progressBar.setVisibility(View.VISIBLE);
+    }
+
     protected abstract RecyclerViewAdapter.AdapterDelegate<H> getAdapterDelegate();
 
 
@@ -171,5 +169,47 @@ public abstract class BaseFragment<T extends DataObject, H extends BaseRecyclerV
     public void setFetch(Fetch fetch) {
         mFetch = fetch;
     }
+
+    protected void setupRefreshLayout() {
+        mSwipeRefreshLayout.setChildView(mRecyclerView);
+        mSwipeRefreshLayout.setOnLoadListener(new RefreshLayout.OnLoadListener() {
+            @Override
+            public void onLoad() {
+                if (isInvertedRefreshActions()) {
+                    loadMoreTriggered();
+                } else {
+                    refreshTriggered();
+                }
+            }
+        });
+        mSwipeRefreshLayout.setOnRefreshListener(new RefreshLayout.OnRefreshListener() {
+            @Override
+            public void onRefresh() {
+                if (!isInvertedRefreshActions()) {
+                    loadMoreTriggered();
+                } else {
+                    refreshTriggered();
+                }
+            }
+        });
+        mSwipeRefreshLayout.setEnabled(isRefreshAvailable());
+    }
+
+    protected void refreshTriggered() {
+        showProgressBar();
+        mDataSource.startContentRefreshing();
+    }
+
+    protected void loadMoreTriggered() {
+        showProgressBar();
+        mDataSource.refreshContentIfPossible();
+    }
+
+    protected boolean isInvertedRefreshActions() {
+        return false;
+    }
+
+    protected boolean isRefreshAvailable() {
+        return true;
     }
 }

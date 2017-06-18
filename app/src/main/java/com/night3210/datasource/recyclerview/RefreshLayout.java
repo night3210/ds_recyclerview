@@ -4,6 +4,7 @@ import android.content.Context;
 import android.support.v4.widget.SwipeRefreshLayout;
 import android.support.v7.widget.RecyclerView;
 import android.util.AttributeSet;
+import android.util.DisplayMetrics;
 import android.view.MotionEvent;
 import android.view.ViewConfiguration;
 
@@ -14,7 +15,8 @@ public class RefreshLayout extends SwipeRefreshLayout {
     private OnLoadListener mOnLoadListener;
 
     private float firstTouchY;
-    private float lastTouchY;
+    private float firstTouchX;
+    private int mTotalDragDistanceImp;
 
     private boolean isLoading = false;
 
@@ -25,6 +27,8 @@ public class RefreshLayout extends SwipeRefreshLayout {
     public RefreshLayout(Context context, AttributeSet attrs) {
         super(context, attrs);
         mTouchSlop = ViewConfiguration.get(context).getScaledTouchSlop();
+        final DisplayMetrics metrics = getResources().getDisplayMetrics();
+        mTotalDragDistanceImp = (int)(64 * metrics.density);
     }
 
     //set the child view of RefreshLayout,ListView
@@ -38,13 +42,24 @@ public class RefreshLayout extends SwipeRefreshLayout {
         switch (action) {
             case MotionEvent.ACTION_DOWN:
                 firstTouchY = event.getRawY();
+                firstTouchX = event.getRawX();
                 break;
 
-            case MotionEvent.ACTION_UP:
-                lastTouchY = event.getRawY();
-                if (canLoadMore()) {
+            case MotionEvent.ACTION_UP: {
+                float lastTouchY = event.getRawY();
+                float lastTouchX = event.getRawX();
+                float diffX = Math.abs(firstTouchX - lastTouchX);
+                // We expect user to move from bottom to top,
+                // So last Y will be smaller that first
+                float diffY = firstTouchY - lastTouchY;
+
+                boolean yMoveMore = diffY > diffX;
+                boolean yMovementMeetsThreshold = diffY >= mTotalDragDistanceImp;
+
+                if (canLoadMore() && yMoveMore && yMovementMeetsThreshold) {
                     loadData();
                 }
+            }
                 break;
             default:
                 break;
@@ -53,7 +68,7 @@ public class RefreshLayout extends SwipeRefreshLayout {
     }
 
     private boolean canLoadMore() {
-        return isBottom() && !isLoading && isPullingUp();
+        return isBottom() && !isLoading;
     }
 
     private boolean isBottom() {
@@ -61,9 +76,6 @@ public class RefreshLayout extends SwipeRefreshLayout {
             return !mListView.canScrollVertically(1);
         }
         return false;
-    }
-    private boolean isPullingUp() {
-        return (firstTouchY - lastTouchY) >= mTouchSlop;
     }
 
     private void loadData() {
@@ -82,7 +94,6 @@ public class RefreshLayout extends SwipeRefreshLayout {
             mOnLoadListener.onLoad();
         } else {
             firstTouchY = 0;
-            lastTouchY = 0;
         }
     }
 
@@ -92,5 +103,11 @@ public class RefreshLayout extends SwipeRefreshLayout {
 
     public interface OnLoadListener {
         public void onLoad();
+    }
+
+    @Override
+    public void setDistanceToTriggerSync(int distance) {
+        super.setDistanceToTriggerSync(distance);
+        mTotalDragDistanceImp = distance;
     }
 }

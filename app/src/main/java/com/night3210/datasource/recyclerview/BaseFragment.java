@@ -175,7 +175,7 @@ public abstract class BaseFragment<T extends DataObject, H extends BaseRecyclerV
         mSwipeRefreshLayout.setOnLoadListener(new RefreshLayout.OnLoadListener() {
             @Override
             public void onLoad() {
-                if (isInvertedRefreshActions()) {
+                if (!isInvertedRefreshActions()) {
                     loadMoreTriggered();
                 } else {
                     refreshTriggered();
@@ -185,7 +185,7 @@ public abstract class BaseFragment<T extends DataObject, H extends BaseRecyclerV
         mSwipeRefreshLayout.setOnRefreshListener(new RefreshLayout.OnRefreshListener() {
             @Override
             public void onRefresh() {
-                if (!isInvertedRefreshActions()) {
+                if (isInvertedRefreshActions()) {
                     loadMoreTriggered();
                 } else {
                     refreshTriggered();

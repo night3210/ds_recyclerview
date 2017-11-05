@@ -31,7 +31,7 @@ public abstract class BaseFragment<T extends DataObject, H extends BaseRecyclerV
     protected RefreshLayout mSwipeRefreshLayout;
     protected LinearLayoutManager mLayoutManager;
     protected ListDataSource<T> mDataSource;
-    protected RecyclerViewAdapter mAdapter;
+    protected RecyclerViewAdapter<T, H> mAdapter;
 
     protected ProgressView progressBar;
     protected TextView textMore;
@@ -96,21 +96,23 @@ public abstract class BaseFragment<T extends DataObject, H extends BaseRecyclerV
         mLayoutManager = new LinearLayoutManager(getContext());
         mRecyclerView.setLayoutManager(mLayoutManager);
 
-        mAdapter = new RecyclerViewAdapter(getAdapterDelegate());
+        mAdapter = new RecyclerViewAdapter<T,H>(getAdapterDelegate());
         mRecyclerView.setAdapter(mAdapter);
         //footerLayout = getLayoutInflater(getArguments()).inflate(R.layout.footer_layout, null);
         if(textMore!=null)
             textMore.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View v) {
-                    //simulateLoadingData();
+                    if (mDataSource != null) {
+                        mDataSource.loadMoreIfPossible();
+                    }
                 }
             });
     }
     public void initDataSource() {
         mDataSource = createDataSource();
         if(mDataSource ==null) {
-            LogUtils.logi("No datasource or fetch, skip datasource creation. ds/fetch = "+ mDataSource);
+            LogUtils.logi("No dataSource or fetch, skip datasource creation. ds/fetch = "+ mFetch);
             return;
         }
         mDataSource.setStateListener(new DataSourceStateListener() {
